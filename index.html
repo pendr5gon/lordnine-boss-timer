@@ -3,150 +3,240 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lord Nine Boss Timer Overlay</title>
+<title>Lord Nine Boss Timers</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Roboto+Mono:wght@600&display=swap" rel="stylesheet">
 <style>
 body {
-  background: rgba(0,0,0,0);
-  font-family: 'Trebuchet MS', sans-serif;
-  color: #FFD700;
-  margin:0;
-  padding:0;
-  text-align:center;
+    background: #0b0c0f;
+    margin: 0;
+    padding: 0;
+    font-family: 'Cinzel', serif;
+    color: #d4af37;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
-h2 {
-  margin:10px 0;
-  font-size:28px;
-  text-shadow:2px 2px 5px #000;
+
+header {
+    text-align: center;
+    margin: 40px 0 20px;
 }
+
+header h1 {
+    font-size: 42px;
+    color: #d4af37;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+header h2 {
+    font-size: 20px;
+    color: #c9a34e;
+    letter-spacing: 3px;
+    margin-top: 5px;
+    font-weight: normal;
+}
+
 .boss-container {
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:center;
-  gap:15px;
-  padding:10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    width: 95%;
+    max-width: 1200px;
+    padding: 20px;
+    box-sizing: border-box;
 }
+
 .boss {
-  background: rgba(0,0,0,0.6);
-  padding:15px;
-  border-radius:12px;
-  width:200px;
-  border:2px solid #FFD700;
-  box-shadow:0 0 15px rgba(255,215,0,0.5);
-  position:relative;
+    background: #111;
+    border: 1px solid #333;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
 }
-.boss h3 { margin:0; font-size:20px; }
-.timer { font-size:26px; margin:12px 0; font-weight:bold; }
-.controls { display:flex; justify-content:space-between; gap:5px; }
+
+.boss h3 {
+    margin: 0 0 12px;
+    font-size: 22px;
+    color: #f4e1b1;
+}
+
+.timer {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #ffffff;
+}
+
+.next {
+    font-size: 14px;
+    color: #bbb;
+    margin-bottom: 12px;
+}
+
+.reminder {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 10px;
+}
+
+.manual-entry {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.manual-entry input[type="time"] {
+    background: #222;
+    border: 1px solid #d4af37;
+    color: #fff;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
 button {
-  background:#444;
-  color:#FFD700;
-  border:1px solid #FFD700;
-  padding:6px;
-  cursor:pointer;
-  border-radius:5px;
-  font-size:12px;
+    background: none;
+    border: 1px solid #d4af37;
+    color: #d4af37;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s;
 }
-button:hover { background:#666; }
-.alert { color:#FF4444; animation: blink 1s infinite; }
-.spawned { color:#00FF7F; animation: pulse 1.5s infinite; }
-.next { font-size:12px; color:#aaa; }
-.reminder { font-size:11px; color:#ccc; margin-bottom:5px; }
-@keyframes blink { 50% { opacity:0.5; } }
-@keyframes pulse { 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.1); } }
+
+button:hover {
+    background: #d4af37;
+    color: #111;
+}
+
+.spawned {
+    color: #00ff7f;
+}
+
+.alert {
+    color: #ff4500;
+}
 </style>
 </head>
 <body>
-<h2>Lord Nine Boss Timers</h2>
+
+<header>
+    <h1>LORD NINE</h1>
+    <h2>BOSS TIMERS</h2>
+</header>
+
 <div class="boss-container" id="bossContainer"></div>
 
 <script>
 const bosses = [
-  { name:'Undomiel', respawn:24*60*60, nextSpawn:'12:05 AM' },
-  { name:'Lady Daliah', respawn:18*60*60, nextSpawn:'10:03 PM' },
-  { name:'Venatus', respawn:10*60*60, nextSpawn:'8:04 AM' },
-  { name:'Viorent', respawn:10*60*60, nextSpawn:'8:14 AM' },
-  { name:'Ego', respawn:21*60*60, nextSpawn:'10:49 AM' },
-  { name:'Thymele', special:true, nextSpawn:'11:30 AM' },
-  { name:'Araneo', respawn:24*60*60, nextSpawn:'11:06 PM' },
-  { name:'Livera', respawn:24*60*60, nextSpawn:'11:16 PM' }
+    { name:'Undomiel', respawn:24*60*60, nextSpawn:'12:05 AM' },
+    { name:'Lady Daliah', respawn:18*60*60, nextSpawn:'10:03 PM' },
+    { name:'Venatus', respawn:10*60*60, nextSpawn:'8:04 AM' },
+    { name:'Viorent', respawn:10*60*60, nextSpawn:'8:14 AM' },
+    { name:'Ego', respawn:21*60*60, nextSpawn:'10:49 AM' },
+    { name:'Thymele', special:true, nextSpawn:'11:50 AM' },
+    { name:'Araneo', respawn:24*60*60, nextSpawn:'11:06 PM' },
+    { name:'Livera', respawn:24*60*60, nextSpawn:'11:16 PM' }
 ];
 
 function parseTime(str){
-  const now = new Date();
-  let [time, ampm] = str.split(' ');
-  let [h,m] = time.split(':').map(Number);
-  if(ampm && ampm.toLowerCase()==='pm' && h<12) h+=12;
-  if(ampm && ampm.toLowerCase()==='am' && h===12) h=0;
-  const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
-  if(dt<now) dt.setDate(dt.getDate()+1);
-  return dt;
+    const now = new Date();
+    let [time, ampm] = str.split(' ');
+    let [h,m] = time.split(':').map(Number);
+    if(ampm && ampm.toLowerCase()==='pm' && h<12) h+=12;
+    if(ampm && ampm.toLowerCase()==='am' && h===12) h=0;
+    const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+    if(dt<now) dt.setDate(dt.getDate()+1);
+    return dt;
 }
 
 function formatTime(ms){
-  if(ms<=0) return 'SPAWNED!';
-  const s=Math.floor(ms/1000);
-  const h=Math.floor(s/3600);
-  const m=Math.floor((s%3600)/60);
-  const sec=s%60;
-  return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+    if(ms<=0) return 'SPAWNED!';
+    const s=Math.floor(ms/1000);
+    const h=Math.floor(s/3600);
+    const m=Math.floor((s%3600)/60);
+    const sec=s%60;
+    return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
 }
 
 function updateTimers(){
-  const container = document.getElementById('bossContainer');
-  container.innerHTML='';
-  const now = new Date();
+    const container = document.getElementById('bossContainer');
+    container.innerHTML='';
+    const now = new Date();
+    bosses.forEach(b=>{
+        let next = (typeof b.nextSpawn === 'string') ? parseTime(b.nextSpawn) : new Date(b.nextSpawn);
+        let diff = next - now;
 
-  bosses.forEach(b=>{
-    let next = (typeof b.nextSpawn === 'string') ? parseTime(b.nextSpawn) : new Date(b.nextSpawn);
-    let diff = next - now;
+        if(diff <= 0 && !b.special){
+            b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
+            next = b.nextSpawn;
+            diff = next - now;
+        }
 
-    // Automatic reset for normal bosses
-    if(diff <= 0 && !b.special){
-      b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
-      next = b.nextSpawn;
-      diff = next - now;
-    }
+        let statusClass = '';
+        if(diff<=0) statusClass='spawned';
+        else if(diff<=10*60*1000) statusClass='alert';
 
-    const div = document.createElement('div');
-    div.className='boss';
-    let statusClass = '';
-    if(diff<=0) statusClass='spawned';
-    else if(diff<=10*60*1000) statusClass='alert';
-
-    div.innerHTML=`
-      <h3>${b.name}</h3>
-      <div class="timer ${statusClass}">${formatTime(diff)}</div>
-      <div class="next">Next: ${next.toLocaleString()}</div>
-      <div class="reminder">Have you killed the boss? Click "Killed Now"</div>
-      <div class="controls">
-        <button onclick="killedNow('${b.name}')">Killed Now</button>
-      </div>
-    `;
-    container.appendChild(div);
-  });
+        const div = document.createElement('div');
+        div.className='boss';
+        div.innerHTML=`
+            <h3>${b.name}</h3>
+            <div class="timer ${statusClass}">${formatTime(diff)}</div>
+            <div class="next">Next: ${next.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            <div class="reminder">Set kill time or click "Killed Now"</div>
+            <div class="manual-entry">
+                <input type="time" id="killTime-${b.name}">
+            </div>
+            <button onclick="killedNow('${b.name}')">Killed Now</button>
+            <button onclick="manualEntry('${b.name}')">Set Manual Kill Time</button>
+        `;
+        container.appendChild(div);
+    });
 }
 
 function killedNow(name){
-  const now = new Date();
-  bosses.forEach(b=>{
-    if(b.name===name){
-      if(b.special){
-        const day = now.getDay();
-        let next = new Date(now);
-        if(day===1){ next.setDate(now.getDate()+2); next.setHours(11,30,0,0); }
-        else if(day===3){ next.setDate(now.getDate()+5); next.setHours(19,0,0,0); }
-        else{ next.setDate(now.getDate()+((1+7-day)%7)); next.setHours(19,0,0,0); }
-        b.nextSpawn = next;
-      } else {
-        // Manual override
-        b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
-      }
+    const now = new Date();
+    bosses.forEach(b=>{
+        if(b.name===name){
+            if(b.special){
+                const day = now.getDay();
+                let next = new Date(now);
+                if(day===1){ next.setDate(now.getDate()+2); next.setHours(11,30,0,0); }
+                else if(day===3){ next.setDate(now.getDate()+5); next.setHours(19,0,0,0); }
+                else{ next.setDate(now.getDate()+((1+7-day)%7)); next.setHours(19,0,0,0); }
+                b.nextSpawn = next;
+            } else {
+                b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
+            }
+        }
+    });
+}
+
+function manualEntry(name){
+    const input = document.getElementById(`killTime-${name}`);
+    const value = input.value;
+    if(value){
+        const now = new Date();
+        const [h,m] = value.split(':').map(Number);
+        let killTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
+        if(killTime > now) killTime.setDate(killTime.getDate()-1); // If future time, assume previous day
+        bosses.forEach(b=>{
+            if(b.name===name && !b.special){
+                b.nextSpawn = new Date(killTime.getTime() + b.respawn*1000);
+            }
+        });
     }
-  });
 }
 
 setInterval(updateTimers,1000);
 updateTimers();
 </script>
+
 </body>
 </html>
