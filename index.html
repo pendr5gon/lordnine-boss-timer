@@ -5,14 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lord Nine Boss Timer Overlay</title>
 <style>
-body { background: rgba(0,0,0,0); font-family: 'Trebuchet MS', sans-serif; color: #FFD700; margin:0; padding:0; text-align:center; }
-h2 { margin:10px 0; font-size:28px; text-shadow:2px 2px 5px #000; }
-.boss-container { display:flex; flex-wrap:wrap; justify-content:center; gap:15px; padding:10px; }
-.boss { background: rgba(0,0,0,0.6); padding:15px; border-radius:12px; width:200px; border:2px solid #FFD700; box-shadow:0 0 15px rgba(255,215,0,0.5); position:relative; }
+body {
+  background: rgba(0,0,0,0);
+  font-family: 'Trebuchet MS', sans-serif;
+  color: #FFD700;
+  margin:0;
+  padding:0;
+  text-align:center;
+}
+h2 {
+  margin:10px 0;
+  font-size:28px;
+  text-shadow:2px 2px 5px #000;
+}
+.boss-container {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:15px;
+  padding:10px;
+}
+.boss {
+  background: rgba(0,0,0,0.6);
+  padding:15px;
+  border-radius:12px;
+  width:200px;
+  border:2px solid #FFD700;
+  box-shadow:0 0 15px rgba(255,215,0,0.5);
+  position:relative;
+}
 .boss h3 { margin:0; font-size:20px; }
 .timer { font-size:26px; margin:12px 0; font-weight:bold; }
 .controls { display:flex; justify-content:space-between; gap:5px; }
-button { background:#444; color:#FFD700; border:1px solid #FFD700; padding:6px; cursor:pointer; border-radius:5px; font-size:12px; }
+button {
+  background:#444;
+  color:#FFD700;
+  border:1px solid #FFD700;
+  padding:6px;
+  cursor:pointer;
+  border-radius:5px;
+  font-size:12px;
+}
 button:hover { background:#666; }
 .alert { color:#FF4444; animation: blink 1s infinite; }
 .spawned { color:#00FF7F; animation: pulse 1.5s infinite; }
@@ -29,13 +62,11 @@ button:hover { background:#666; }
 <script>
 const bosses = [
   { name:'Undomiel', respawn:24*60*60, nextSpawn:'12:05 AM' },
-  { name:'Lady Daliah', respawn:18*60*60, nextSpawn:'10:03 PM' }, // updated
-  { name:'Venatus (AM)', respawn:10*60*60, nextSpawn:'8:04 AM' },
-  { name:'Viorent (AM)', respawn:10*60*60, nextSpawn:'8:14 AM' },
+  { name:'Lady Daliah', respawn:18*60*60, nextSpawn:'10:03 PM' },
+  { name:'Venatus', respawn:10*60*60, nextSpawn:'8:04 AM' },
+  { name:'Viorent', respawn:10*60*60, nextSpawn:'8:14 AM' },
   { name:'Ego', respawn:21*60*60, nextSpawn:'10:49 AM' },
   { name:'Thymele', special:true, nextSpawn:'11:30 AM' },
-  { name:'Venatus (PM)', respawn:10*60*60, nextSpawn:'6:00 PM' },
-  { name:'Viorent (PM)', respawn:10*60*60, nextSpawn:'6:00 PM' },
   { name:'Araneo', respawn:24*60*60, nextSpawn:'11:06 PM' },
   { name:'Livera', respawn:24*60*60, nextSpawn:'11:16 PM' }
 ];
@@ -89,7 +120,7 @@ function killedNow(name){
   const now = new Date();
   bosses.forEach(b=>{
     if(b.name===name){
-      if(b.special){ 
+      if(b.special){
         const day = now.getDay();
         let next=new Date(now);
         if(day===1){ next.setDate(now.getDate()+2); next.setHours(11,30,0,0); }
