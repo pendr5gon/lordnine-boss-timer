@@ -1,241 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Lord Nine Boss Timers</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Roboto+Mono:wght@600&display=swap" rel="stylesheet">
 <style>
 body {
-    background: #0b0c0f;
-    margin: 0;
-    padding: 0;
-    font-family: 'Cinzel', serif;
-    color: #d4af37;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  background:#0b0c0f;
+  margin:0;
+  padding:0;
+  font-family:'Cinzel',serif;
+  color:#d4af37;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
-
 header {
-    text-align: center;
-    margin: 40px 0 20px;
+  text-align:center;
+  margin:40px 0 20px;
 }
-
 header h1 {
-    font-size: 42px;
-    color: #d4af37;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin: 0;
+  font-size:42px;
+  color:#d4af37;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  margin:0;
+  text-shadow:0 0 8px #d4af37;
+  animation:glow 2s ease-in-out infinite alternate;
 }
-
+@keyframes glow {
+  from { text-shadow:0 0 8px #d4af37; }
+  to { text-shadow:0 0 20px #ffd700; }
+}
 header h2 {
-    font-size: 20px;
-    color: #c9a34e;
-    letter-spacing: 3px;
-    margin-top: 5px;
-    font-weight: normal;
+  font-size:20px;
+  color:#c9a34e;
+  letter-spacing:3px;
+  margin-top:5px;
+  font-weight:normal;
 }
-
 .boss-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    width: 95%;
-    max-width: 1200px;
-    padding: 20px;
-    box-sizing: border-box;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:20px;
+  width:95%;
+  max-width:1200px;
+  padding:20px;
+  box-sizing:border-box;
 }
-
 .boss {
-    background: #111;
-    border: 1px solid #333;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+  background:#111;
+  border:1px solid #333;
+  padding:20px;
+  border-radius:10px;
+  text-align:center;
+  box-shadow:0 0 15px rgba(212,175,55,.3);
+  transition:transform .3s;
 }
-
+.boss:hover {
+  transform:scale(1.05);
+  box-shadow:0 0 20px rgba(212,175,55,.6);
+}
 .boss h3 {
-    margin: 0 0 12px;
-    font-size: 22px;
-    color: #f4e1b1;
+  margin:0 0 12px;
+  font-size:22px;
+  color:#f4e1b1;
 }
-
 .timer {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #ffffff;
+  font-family:'Roboto Mono',monospace;
+  font-size:28px;
+  font-weight:700;
+  margin-bottom:10px;
+  color:#fff;
 }
-
 .next {
-    font-size: 14px;
-    color: #bbb;
-    margin-bottom: 12px;
+  font-size:14px;
+  color:#bbb;
+  margin-bottom:12px;
 }
-
 .reminder {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 10px;
+  font-size:12px;
+  color:#888;
+  margin-bottom:10px;
 }
-
 .manual-entry {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 10px;
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-bottom:10px;
+  flex-wrap:wrap;
 }
-
 .manual-entry input[type="time"] {
-    background: #222;
-    border: 1px solid #d4af37;
-    color: #fff;
-    padding: 4px 6px;
-    border-radius: 4px;
-    font-size: 12px;
+  background:#222;
+  border:1px solid #d4af37;
+  color:#fff;
+  padding:6px 8px;
+  border-radius:6px;
+  font-size:13px;
 }
-
+.controls {
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
 button {
-    background: none;
-    border: 1px solid #d4af37;
-    color: #d4af37;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.3s;
+  background:none;
+  border:1px solid #d4af37;
+  color:#d4af37;
+  padding:8px 12px;
+  border-radius:8px;
+  font-size:13px;
+  cursor:pointer;
+  transition:.2s;
 }
-
 button:hover {
-    background: #d4af37;
-    color: #111;
+  background:#d4af37;
+  color:#111;
 }
-
 .spawned {
-    color: #00ff7f;
+  color:#00ff7f;
 }
-
 .alert {
-    color: #ff4500;
+  color:#ff4500;
 }
 </style>
 </head>
 <body>
 
 <header>
-    <h1>LORD NINE</h1>
-    <h2>BOSS TIMERS</h2>
+  <h1>LORD NINE</h1>
+  <h2>BOSS TIMERS</h2>
 </header>
 
 <div class="boss-container" id="bossContainer"></div>
 
 <script>
+// ---- Data ----
 const bosses = [
-    { name:'Undomiel', respawn:24*60*60, nextSpawn:'12:05 AM' },
-    { name:'Lady Daliah', respawn:18*60*60, nextSpawn:'10:03 PM' },
-    { name:'Venatus', respawn:10*60*60, nextSpawn:'8:04 AM' },
-    { name:'Viorent', respawn:10*60*60, nextSpawn:'8:14 AM' },
-    { name:'Ego', respawn:21*60*60, nextSpawn:'10:49 AM' },
-    { name:'Thymele', special:true, nextSpawn:'11:50 AM' },
-    { name:'Araneo', respawn:24*60*60, nextSpawn:'11:06 PM' },
-    { name:'Livera', respawn:24*60*60, nextSpawn:'11:16 PM' }
+  { name:'Undomiel',   respawn:24*60*60, nextSpawn:'12:05 AM' },
+  { name:'Lady Daliah',respawn:18*60*60, nextSpawn:'10:03 PM' },
+  { name:'Venatus',    respawn:10*60*60, nextSpawn:'8:04 AM' },
+  { name:'Viorent',    respawn:10*60*60, nextSpawn:'8:14 AM' },
+  { name:'Ego',        respawn:21*60*60, nextSpawn:'10:49 AM' },
+  { name:'Thymele',    special:true,     nextSpawn:'11:50 AM' },
+  { name:'Araneo',     respawn:24*60*60, nextSpawn:'11:06 PM' },
+  { name:'Livera',     respawn:24*60*60, nextSpawn:'11:16 PM' }
 ];
 
+function nameToId(n){
+  return ('b-' + n.toLowerCase().trim()
+    .replace(/\s+/g,'-')
+    .replace(/[^a-z0-9-]/g,''));
+}
+
+function getBossById(id){
+  return bosses.find(b => nameToId(b.name) === id);
+}
+
 function parseTime(str){
-    const now = new Date();
-    let [time, ampm] = str.split(' ');
-    let [h,m] = time.split(':').map(Number);
-    if(ampm && ampm.toLowerCase()==='pm' && h<12) h+=12;
-    if(ampm && ampm.toLowerCase()==='am' && h===12) h=0;
-    const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
-    if(dt<now) dt.setDate(dt.getDate()+1);
-    return dt;
+  const now = new Date();
+  let [time, ampm] = str.split(' ');
+  let [h,m] = time.split(':').map(Number);
+  if(ampm && ampm.toLowerCase()==='pm' && h<12) h+=12;
+  if(ampm && ampm.toLowerCase()==='am' && h===12) h=0;
+  const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+  if(dt < now) dt.setDate(dt.getDate()+1);
+  return dt;
 }
 
 function formatTime(ms){
-    if(ms<=0) return 'SPAWNED!';
-    const s=Math.floor(ms/1000);
-    const h=Math.floor(s/3600);
-    const m=Math.floor((s%3600)/60);
-    const sec=s%60;
-    return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+  if(ms<=0) return 'SPAWNED!';
+  const s=Math.floor(ms/1000);
+  const h=Math.floor(s/3600);
+  const m=Math.floor((s%3600)/60);
+  const sec=s%60;
+  return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+}
+
+function nextThymeleSpawn(fromDate){
+  const base = new Date(fromDate);
+  const day  = base.getDay();
+  const next = new Date(base);
+  if(day === 1){
+    next.setDate(base.getDate()+2);
+    next.setHours(11,30,0,0);
+  } else if(day === 3){
+    next.setDate(base.getDate()+5);
+    next.setHours(19,0,0,0);
+  } else {
+    const daysToMon = (1 + 7 - day) % 7 || 7;
+    next.setDate(base.getDate()+daysToMon);
+    next.setHours(19,0,0,0);
+  }
+  return next;
+}
+
+// ---- Create UI once ----
+function createUI(){
+  const container = document.getElementById('bossContainer');
+  bosses.forEach(b => {
+    const id = nameToId(b.name);
+    if(typeof b.nextSpawn === 'string') b.nextSpawn = parseTime(b.nextSpawn);
+
+    const div = document.createElement('div');
+    div.className = 'boss';
+    div.innerHTML = `
+      <h3>${b.name}</h3>
+      <div class="timer" id="timer-${id}"></div>
+      <div class="next" id="next-${id}"></div>
+      <div class="reminder">Set a kill time or use "Killed Now"</div>
+      <div class="manual-entry">
+        <input type="time" id="killTime-${id}" step="60" aria-label="Kill time for ${b.name}">
+      </div>
+      <div class="controls">
+        <button onclick="killedNow('${id}')">Killed Now</button>
+        <button onclick="manualEntry('${id}')">Set Manual Kill Time</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
 }
 
 function updateTimers(){
-    const container = document.getElementById('bossContainer');
-    container.innerHTML='';
-    const now = new Date();
-    bosses.forEach(b=>{
-        let next = (typeof b.nextSpawn === 'string') ? parseTime(b.nextSpawn) : new Date(b.nextSpawn);
-        let diff = next - now;
+  const now = new Date();
+  bosses.forEach(b => {
+    let next = b.nextSpawn;
+    if(!(next instanceof Date)) next = parseTime(next);
+    let diff = next - now;
 
-        if(diff <= 0 && !b.special){
-            b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
-            next = b.nextSpawn;
-            diff = next - now;
-        }
-
-        let statusClass = '';
-        if(diff<=0) statusClass='spawned';
-        else if(diff<=10*60*1000) statusClass='alert';
-
-        const div = document.createElement('div');
-        div.className='boss';
-        div.innerHTML=`
-            <h3>${b.name}</h3>
-            <div class="timer ${statusClass}">${formatTime(diff)}</div>
-            <div class="next">Next: ${next.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-            <div class="reminder">Set kill time or click "Killed Now"</div>
-            <div class="manual-entry">
-                <input type="time" id="killTime-${b.name}">
-            </div>
-            <button onclick="killedNow('${b.name}')">Killed Now</button>
-            <button onclick="manualEntry('${b.name}')">Set Manual Kill Time</button>
-        `;
-        container.appendChild(div);
-    });
-}
-
-function killedNow(name){
-    const now = new Date();
-    bosses.forEach(b=>{
-        if(b.name===name){
-            if(b.special){
-                const day = now.getDay();
-                let next = new Date(now);
-                if(day===1){ next.setDate(now.getDate()+2); next.setHours(11,30,0,0); }
-                else if(day===3){ next.setDate(now.getDate()+5); next.setHours(19,0,0,0); }
-                else{ next.setDate(now.getDate()+((1+7-day)%7)); next.setHours(19,0,0,0); }
-                b.nextSpawn = next;
-            } else {
-                b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
-            }
-        }
-    });
-}
-
-function manualEntry(name){
-    const input = document.getElementById(`killTime-${name}`);
-    const value = input.value;
-    if(value){
-        const now = new Date();
-        const [h,m] = value.split(':').map(Number);
-        let killTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
-        if(killTime > now) killTime.setDate(killTime.getDate()-1); // If future time, assume previous day
-        bosses.forEach(b=>{
-            if(b.name===name && !b.special){
-                b.nextSpawn = new Date(killTime.getTime() + b.respawn*1000);
-            }
-        });
+    if(diff <= 0 && !b.special){
+      b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
+      next = b.nextSpawn;
+      diff = next - now;
     }
+
+    const id = nameToId(b.name);
+    const timerEl = document.getElementById(`timer-${id}`);
+    const nextEl = document.getElementById(`next-${id}`);
+
+    if(timerEl && nextEl){
+      timerEl.textContent = formatTime(diff);
+      timerEl.className = 'timer';
+      if(diff<=0) timerEl.classList.add('spawned');
+      else if(diff<=10*60*1000) timerEl.classList.add('alert');
+      nextEl.textContent = `Next: ${next.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
+  });
 }
 
-setInterval(updateTimers,1000);
+function killedNow(id){
+  const b = getBossById(id);
+  const now = new Date();
+  if(b.special){
+    b.nextSpawn = nextThymeleSpawn(now);
+  } else {
+    b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
+  }
+}
+
+function manualEntry(id){
+  const input = document.getElementById(`killTime-${id}`);
+  if(!input || !input.value) return;
+  const now = new Date();
+  const [h,m] = input.value.split(':').map(Number);
+  let killTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+  if(killTime > now) killTime.setDate(killTime.getDate()-1);
+
+  const b = getBossById(id);
+  if(b.special){
+    b.nextSpawn = nextThymeleSpawn(killTime);
+  } else {
+    b.nextSpawn = new Date(killTime.getTime() + b.respawn*1000);
+  }
+}
+
+// ---- Start ----
+createUI();
 updateTimers();
+setInterval(updateTimers, 1000);
 </script>
 
 </body>
