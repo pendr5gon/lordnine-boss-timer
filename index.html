@@ -6,6 +6,7 @@
 <title>Lord Nine Boss Timers</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Roboto+Mono:wght@600&display=swap" rel="stylesheet">
 <style>
+/* ---- Original Design ---- */
 body {
   background:#0b0c0f;
   margin:0;
@@ -31,7 +32,7 @@ header h1 {
 }
 @keyframes glow {
   from { text-shadow:0 0 8px #d4af37; }
-  to { text-shadow:0 0 20px #ffd700; }
+  to   { text-shadow:0 0 20px #ffd700; }
 }
 header h2 {
   font-size:20px;
@@ -45,7 +46,7 @@ header h2 {
   grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:20px;
   width:95%;
-  max-width:1200px;
+  max-width:1400px;
   padding:20px;
   box-sizing:border-box;
 }
@@ -119,12 +120,8 @@ button:hover {
   background:#d4af37;
   color:#111;
 }
-.spawned {
-  color:#00ff7f;
-}
-.alert {
-  color:#ff4500;
-}
+.spawned { color:#00ff7f; }
+.alert   { color:#ff4500; }
 </style>
 </head>
 <body>
@@ -137,39 +134,67 @@ button:hover {
 <div class="boss-container" id="bossContainer"></div>
 
 <script>
-// ---- Data ----
+/* =========================
+   Data Model
+   ========================= */
 const bosses = [
-  { name:'Undomiel',   respawn:24*60*60, nextSpawn:'12:05 AM' },
-  { name:'Lady Daliah',respawn:18*60*60, nextSpawn:'10:03 PM' },
-  { name:'Venatus',    respawn:10*60*60, nextSpawn:'8:04 AM' },
-  { name:'Viorent',    respawn:10*60*60, nextSpawn:'8:14 AM' },
-  { name:'Ego',        respawn:21*60*60, nextSpawn:'10:49 AM' },
-  { name:'Thymele',    special:true,     nextSpawn:'11:50 AM' },
-  { name:'Araneo',     respawn:24*60*60, nextSpawn:'11:06 PM' },
-  { name:'Livera',     respawn:24*60*60, nextSpawn:'11:16 PM' }
+  /* --- Original set --- */
+  { name:'Undomiel',    respawn:24*60*60, nextSpawn:'12:05 AM' },
+  { name:'Lady Daliah', respawn:18*60*60, nextSpawn:'10:03 PM' },
+  { name:'Venatus',     respawn:10*60*60, nextSpawn:'8:04 AM' },
+  { name:'Viorent',     respawn:10*60*60, nextSpawn:'8:14 AM' },
+  { name:'Ego',         respawn:21*60*60, nextSpawn:'10:49 AM' },
+  // Thymele: Mon 19:00 and Wed 11:30 (original special logic)
+  { name:'Thymele',     schedule:[{day:1,hour:19,minute:0},{day:3,hour:11,minute:30}] },
+  { name:'Araneo',      respawn:24*60*60, nextSpawn:'11:06 PM' },
+  { name:'Livera',      respawn:24*60*60, nextSpawn:'11:16 PM' },
+
+  /* --- New bosses per your list --- */
+  // Weekly schedules
+  { name:'Clemantis',   schedule:[{day:1,hour:11,minute:30},{day:4,hour:19,minute:0}] },     // Mon 11:30, Thu 19:00
+  { name:'Saphirus',    schedule:[{day:0,hour:17,minute:0},{day:2,hour:11,minute:30}] },     // Sun 17:00, Tue 11:30
+  { name:'Neutro',      schedule:[{day:2,hour:19,minute:0},{day:4,hour:11,minute:30}] },     // Tue 19:00, Thu 11:30
+  { name:'Milavy',      schedule:[{day:6,hour:15,minute:0}] },                                // Sat 15:00
+  { name:'Ringor',      schedule:[{day:6,hour:17,minute:0}] },                                // Sat 17:00
+  { name:'Roderick',    schedule:[{day:5,hour:19,minute:0}] },                                // Fri 19:00
+  { name:'Auraq',       schedule:[{day:0,hour:21,minute:0},{day:3,hour:21,minute:0}] },      // Sun 21:00, Wed 21:00
+
+  // Hour-based respawns
+  { name:'General Aquleus', respawn:29*60*60 },
+  { name:'Amentis',         respawn:29*60*60 },
+  { name:'Baron Braudmore', respawn:32*60*60 },
+  { name:'Wannitas',        respawn:48*60*60 },
+  { name:'Metus',           respawn:48*60*60 },
+  { name:'Duplican',        respawn:48*60*60 },
+  { name:'Shuliar',         respawn:35*60*60 },
+  { name:'Gareth',          respawn:32*60*60 },
+  { name:'Titore',          respawn:37*60*60 },
+  { name:'Larba',           respawn:35*60*60 },
+  { name:'Catena',          respawn:35*60*60 }
 ];
 
+/* =========================
+   Helpers
+   ========================= */
 function nameToId(n){
   return ('b-' + n.toLowerCase().trim()
     .replace(/\s+/g,'-')
     .replace(/[^a-z0-9-]/g,''));
 }
-
 function getBossById(id){
   return bosses.find(b => nameToId(b.name) === id);
 }
-
 function parseTime(str){
+  // Parses "h:mm AM/PM" into next occurrence (today or tomorrow)
   const now = new Date();
   let [time, ampm] = str.split(' ');
   let [h,m] = time.split(':').map(Number);
   if(ampm && ampm.toLowerCase()==='pm' && h<12) h+=12;
   if(ampm && ampm.toLowerCase()==='am' && h===12) h=0;
   const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
-  if(dt < now) dt.setDate(dt.getDate()+1);
+  if(dt <= now) dt.setDate(dt.getDate()+1);
   return dt;
 }
-
 function formatTime(ms){
   if(ms<=0) return 'SPAWNED!';
   const s=Math.floor(ms/1000);
@@ -178,38 +203,44 @@ function formatTime(ms){
   const sec=s%60;
   return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
 }
-
-function nextThymeleSpawn(fromDate){
+function nextScheduledSpawn(schedule, fromDate=new Date()){
+  // schedule: [{day:0-6, hour:0-23, minute:0-59}, ...]
   const base = new Date(fromDate);
-  const day  = base.getDay();
-  const next = new Date(base);
-  if(day === 1){
-    next.setDate(base.getDate()+2);
-    next.setHours(11,30,0,0);
-  } else if(day === 3){
-    next.setDate(base.getDate()+5);
-    next.setHours(19,0,0,0);
-  } else {
-    const daysToMon = (1 + 7 - day) % 7 || 7;
-    next.setDate(base.getDate()+daysToMon);
-    next.setHours(19,0,0,0);
+  let soonest = null;
+  for(const sch of schedule){
+    const cand = new Date(base);
+    const dayOffset = (sch.day - cand.getDay() + 7) % 7;
+    cand.setDate(cand.getDate() + dayOffset);
+    cand.setHours(sch.hour, sch.minute, 0, 0);
+    if(cand <= base) cand.setDate(cand.getDate() + 7); // move to next week if already passed
+    if(!soonest || cand < soonest) soonest = cand;
   }
-  return next;
+  return soonest || new Date(base.getTime() + 7*24*60*60*1000); // fallback
 }
 
-// ---- Create UI once ----
+/* =========================
+   Build UI once
+   ========================= */
 function createUI(){
   const container = document.getElementById('bossContainer');
   bosses.forEach(b => {
-    const id = nameToId(b.name);
-    if(typeof b.nextSpawn === 'string') b.nextSpawn = parseTime(b.nextSpawn);
+    // Initialize nextSpawn for each boss
+    if(typeof b.nextSpawn === 'string') {
+      b.nextSpawn = parseTime(b.nextSpawn);
+    } else if(b.schedule && !b.nextSpawn) {
+      b.nextSpawn = nextScheduledSpawn(b.schedule, new Date());
+    } else if(b.respawn && !b.nextSpawn) {
+      // Start counting from now if no seed; user can set manual time too
+      b.nextSpawn = new Date(Date.now() + b.respawn*1000);
+    }
 
+    const id = nameToId(b.name);
     const div = document.createElement('div');
     div.className = 'boss';
     div.innerHTML = `
       <h3>${b.name}</h3>
-      <div class="timer" id="timer-${id}"></div>
-      <div class="next" id="next-${id}"></div>
+      <div class="timer" id="timer-${id}">--:--:--</div>
+      <div class="next" id="next-${id}">Next: calculating…</div>
       <div class="reminder">Set a kill time or use "Killed Now"</div>
       <div class="manual-entry">
         <input type="time" id="killTime-${id}" step="60" aria-label="Kill time for ${b.name}">
@@ -223,60 +254,80 @@ function createUI(){
   });
 }
 
+/* =========================
+   Live updates
+   ========================= */
 function updateTimers(){
   const now = new Date();
   bosses.forEach(b => {
-    let next = b.nextSpawn;
-    if(!(next instanceof Date)) next = parseTime(next);
-    let diff = next - now;
-
-    if(diff <= 0 && !b.special){
+    // Ensure nextSpawn always valid going forward
+    if(b.schedule && (!b.nextSpawn || b.nextSpawn <= now)){
+      b.nextSpawn = nextScheduledSpawn(b.schedule, now);
+    }
+    if(b.respawn && (!b.nextSpawn || b.nextSpawn <= now)){
       b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
-      next = b.nextSpawn;
-      diff = next - now;
     }
 
     const id = nameToId(b.name);
     const timerEl = document.getElementById(`timer-${id}`);
-    const nextEl = document.getElementById(`next-${id}`);
+    const nextEl  = document.getElementById(`next-${id}`);
+    if(!timerEl || !nextEl) return;
 
-    if(timerEl && nextEl){
-      timerEl.textContent = formatTime(diff);
-      timerEl.className = 'timer';
-      if(diff<=0) timerEl.classList.add('spawned');
-      else if(diff<=10*60*1000) timerEl.classList.add('alert');
-      nextEl.textContent = `Next: ${next.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-    }
+    const diff = b.nextSpawn - now;
+    timerEl.textContent = formatTime(diff);
+    timerEl.className = 'timer';
+    if(diff<=0) timerEl.classList.add('spawned');
+    else if(diff<=10*60*1000) timerEl.classList.add('alert');
+
+    nextEl.textContent = `Next: ${b.nextSpawn.toLocaleString([], {
+      weekday:'short', hour:'2-digit', minute:'2-digit'
+    })}`;
   });
 }
 
+/* =========================
+   Actions
+   ========================= */
 function killedNow(id){
   const b = getBossById(id);
+  if(!b) return;
   const now = new Date();
-  if(b.special){
-    b.nextSpawn = nextThymeleSpawn(now);
-  } else {
+
+  if(b.schedule){
+    b.nextSpawn = nextScheduledSpawn(b.schedule, now);
+  } else if(b.respawn){
     b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
   }
+  updateTimers(); // immediate UI refresh
 }
 
 function manualEntry(id){
   const input = document.getElementById(`killTime-${id}`);
   if(!input || !input.value) return;
+
   const now = new Date();
   const [h,m] = input.value.split(':').map(Number);
+  // user-entered KILL time (assume today at that time)
   let killTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
-  if(killTime > now) killTime.setDate(killTime.getDate()-1);
+
+  // Optional: if user picks a future time today and you want to assume "yesterday", uncomment:
+  // if (killTime > now) killTime.setDate(killTime.getDate() - 1);
 
   const b = getBossById(id);
-  if(b.special){
-    b.nextSpawn = nextThymeleSpawn(killTime);
-  } else {
+  if(!b) return;
+
+  if(b.schedule){
+    // Next scheduled spawn AFTER the kill time
+    b.nextSpawn = nextScheduledSpawn(b.schedule, killTime);
+  } else if(b.respawn){
     b.nextSpawn = new Date(killTime.getTime() + b.respawn*1000);
   }
+  updateTimers(); // immediate UI refresh
 }
 
-// ---- Start ----
+/* =========================
+   Start
+   ========================= */
 createUI();
 updateTimers();
 setInterval(updateTimers, 1000);
