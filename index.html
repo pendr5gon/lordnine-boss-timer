@@ -50,6 +50,7 @@ button:hover { background:#666; }
 .alert { color:#FF4444; animation: blink 1s infinite; }
 .spawned { color:#00FF7F; animation: pulse 1.5s infinite; }
 .next { font-size:12px; color:#aaa; }
+.reminder { font-size:11px; color:#ccc; margin-bottom:5px; }
 @keyframes blink { 50% { opacity:0.5; } }
 @keyframes pulse { 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.1); } }
 </style>
@@ -57,7 +58,6 @@ button:hover { background:#666; }
 <body>
 <h2>Lord Nine Boss Timers</h2>
 <div class="boss-container" id="bossContainer"></div>
-<div class="next" id="syncStatus">Syncing data...</div>
 
 <script>
 const bosses = [
@@ -95,19 +95,29 @@ function updateTimers(){
   const container = document.getElementById('bossContainer');
   container.innerHTML='';
   const now = new Date();
+
   bosses.forEach(b=>{
-    let next;
-    if(typeof b.nextSpawn==='string') next=parseTime(b.nextSpawn);
-    else next=new Date(b.nextSpawn);
-    const diff = next - now;
-    const div = document.createElement('div'); div.className='boss';
-    let statusClass='';
+    let next = (typeof b.nextSpawn === 'string') ? parseTime(b.nextSpawn) : new Date(b.nextSpawn);
+    let diff = next - now;
+
+    // Automatic reset for normal bosses
+    if(diff <= 0 && !b.special){
+      b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
+      next = b.nextSpawn;
+      diff = next - now;
+    }
+
+    const div = document.createElement('div');
+    div.className='boss';
+    let statusClass = '';
     if(diff<=0) statusClass='spawned';
     else if(diff<=10*60*1000) statusClass='alert';
+
     div.innerHTML=`
       <h3>${b.name}</h3>
-      <div class="timer ${statusClass}">${diff>0?formatTime(diff):'SPAWNED!'}</div>
+      <div class="timer ${statusClass}">${formatTime(diff)}</div>
       <div class="next">Next: ${next.toLocaleString()}</div>
+      <div class="reminder">Have you killed the boss? Click "Killed Now"</div>
       <div class="controls">
         <button onclick="killedNow('${b.name}')">Killed Now</button>
       </div>
@@ -122,12 +132,15 @@ function killedNow(name){
     if(b.name===name){
       if(b.special){
         const day = now.getDay();
-        let next=new Date(now);
+        let next = new Date(now);
         if(day===1){ next.setDate(now.getDate()+2); next.setHours(11,30,0,0); }
         else if(day===3){ next.setDate(now.getDate()+5); next.setHours(19,0,0,0); }
         else{ next.setDate(now.getDate()+((1+7-day)%7)); next.setHours(19,0,0,0); }
-        b.nextSpawn=next;
-      } else b.nextSpawn=new Date(now.getTime()+b.respawn*1000);
+        b.nextSpawn = next;
+      } else {
+        // Manual override
+        b.nextSpawn = new Date(now.getTime() + b.respawn*1000);
+      }
     }
   });
 }
