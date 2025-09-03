@@ -48,6 +48,12 @@ header h2 { font-size:20px; color:#c9a34e; letter-spacing:3px; margin-top:5px; f
 .boss:hover { transform:scale(1.05); box-shadow:0 0 20px rgba(212,175,55,.6); }
 .boss h3 { margin:0 0 12px; font-size:22px; color:#f4e1b1; }
 .timer { font-family:'Roboto Mono',monospace; font-size:28px; font-weight:700; margin-bottom:10px; color:#fff; }
+.timer.spawned { color:#00ff7f; animation:pulse 1s infinite alternate; }
+@keyframes pulse {
+  from { text-shadow:0 0 5px #00ff7f; }
+  to { text-shadow:0 0 20px #00ff7f; }
+}
+.timer.alert { color:#ff4500; }
 .next { font-size:14px; color:#bbb; margin-bottom:12px; }
 .reminder { font-size:12px; color:#888; margin-bottom:10px; }
 .manual-entry { display:flex; justify-content:center; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
@@ -59,8 +65,6 @@ header h2 { font-size:20px; color:#c9a34e; letter-spacing:3px; margin-top:5px; f
 .controls { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
 button { background:none; border:1px solid #d4af37; color:#d4af37; padding:8px 12px; border-radius:8px; font-size:13px; cursor:pointer; transition:.2s, transform .2s; }
 button:hover { background:#d4af37; color:#111; transform:scale(1.05); }
-.spawned { color:#00ff7f; }
-.alert { color:#ff4500; }
 .reset-btn { margin-bottom:15px; }
 </style>
 </head>
@@ -105,7 +109,14 @@ const bosses = [
   { name:'Titore', respawn:37*60*60 },
   { name:'Larba', respawn:35*60*60 },
   { name:'Catena', respawn:35*60*60 },
-  { name:'Auraq', special:true, schedule:[{day:0,hour:21,minute:0},{day:3,hour:21,minute:0}] }
+  { name:'Auraq', special:true, schedule:[{day:0,hour:21,minute:0},{day:3,hour:21,minute:0}] },
+
+  // === NEW BOSSES ===
+  { name:'Supore', respawn:62*60*60 },
+  { name:'Asta', respawn:62*60*60 },
+  { name:'Ordo', respawn:62*60*60 },
+  { name:'Secreta', respawn:62*60*60 },
+  { name:'Chaiflock', special:true, schedule:[{day:6,hour:22,minute:0}] } // Saturday 22:00 UTC+8
 ];
 
 function nameToId(n){ return ('b-' + n.toLowerCase().trim().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')); }
@@ -131,7 +142,6 @@ function formatTime(ms){
   return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
 }
 
-// updated getNextScheduled to accept fromTime
 function getNextScheduled(schedule, fromTime=new Date()){
   let soonest=null;
   schedule.forEach(s=>{
@@ -149,18 +159,45 @@ function getNextScheduled(schedule, fromTime=new Date()){
 function saveTimers() {
   const data = {};
   bosses.forEach(b => {
-    data[nameToId(b.name)] = b.nextSpawn.getTime();
+    data[nameToId(b.name)] = {
+      nextSpawn: b.nextSpawn ? b.nextSpawn.getTime() : null,
+      manual: !!b.manual,
+      respawn: b.respawn || null,
+      schedule: b.schedule || null
+    };
   });
   localStorage.setItem('bossTimers', JSON.stringify(data));
 }
 
 function loadTimers() {
-  const data = JSON.parse(localStorage.getItem('bossTimers') || '{}');
+  const raw = localStorage.getItem('bossTimers');
+  if (!raw) return;
+  const data = JSON.parse(raw);
+  const now = Date.now();
+
   bosses.forEach(b => {
     const id = nameToId(b.name);
-    if(data[id]){
-      b.nextSpawn = new Date(data[id]);
+    const saved = data[id];
+    if (!saved) return;
+
+    if (saved.schedule) {
+      b.nextSpawn = getNextScheduled(saved.schedule, new Date());
+    } else if (saved.respawn) {
+      if (saved.nextSpawn && saved.nextSpawn > now) {
+        b.nextSpawn = new Date(saved.nextSpawn);
+      } else if (saved.nextSpawn) {
+        let next = saved.nextSpawn;
+        while (next <= now) {
+          next += saved.respawn * 1000;
+        }
+        b.nextSpawn = new Date(next);
+      } else {
+        b.nextSpawn = new Date(now + saved.respawn * 1000);
+      }
+    } else if (saved.nextSpawn) {
+      b.nextSpawn = new Date(saved.nextSpawn);
     }
+    b.manual = saved.manual;
   });
 }
 // -----------------------------------------------------
@@ -208,8 +245,10 @@ function updateTimers(){
     let next=b.nextSpawn;
     let diff=next-now;
     if(diff<=0 && b.respawn){
-      b.nextSpawn=new Date(now.getTime()+b.respawn*1000);
-      next=b.nextSpawn;
+      while (next <= now) {
+        next = new Date(next.getTime() + b.respawn*1000);
+      }
+      b.nextSpawn=next;
       diff=next-now;
     }
     if(!soonestBoss || next<soonestBoss.nextSpawn) soonestBoss=b;
@@ -241,6 +280,8 @@ function updateTimers(){
     const highlightCard=document.getElementById(`card-${nameToId(soonestBoss.name)}`);
     if(highlightCard) highlightCard.classList.add('highlight');
   }
+
+  saveTimers(); // keep everything synced
 }
 
 function killedNow(id){
